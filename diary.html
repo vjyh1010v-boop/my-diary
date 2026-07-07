@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  나의 할 일 다이어리 — HTML (구조 담당)
+  ============================================================
+  이 파일은 화면의 "뼈대(구조)"만 담고 있습니다.
+  - 디자인(색, 크기, 배치)  → diary.css
+  - 동작(클릭, 저장, 계산)  → diary.js
+  세 파일은 반드시 같은 폴더에 함께 두세요!
+  ============================================================
+-->
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 모바일 브라우저 상단 색상 & '홈 화면에 추가' 시 앱처럼 보이게 하는 설정 -->
+  <meta name="theme-color" content="#4e9e5f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="할일다이어리">
+  <title>나의 할 일 다이어리</title>
+
+  <!-- CSS 파일 연결: 화면 디자인을 불러옵니다 -->
+  <link rel="stylesheet" href="diary.css">
+</head>
+<body>
+
+<!-- ─────────── 잠금 화면 (비밀번호 로그인/회원가입) ───────────
+     diary.js의 boot()가 상황에 맞게 보여주거나 숨깁니다. -->
+<div id="lockScreen" class="lock-screen" style="display:none">
+  <div class="lock-card">
+    <div class="lock-logo">🔐</div>
+    <h2 id="lockTitle">잠금 해제</h2>
+    <p id="lockDesc" class="lock-desc"></p>
+    <input type="password" id="lockPw" placeholder="비밀번호" onkeydown="if(event.key==='Enter')lockSubmit()">
+    <input type="password" id="lockPw2" placeholder="비밀번호 확인" style="display:none" onkeydown="if(event.key==='Enter')lockSubmit()">
+    <div id="lockMsg" class="lock-msg"></div>
+    <button class="lock-btn" onclick="lockSubmit()">확인</button>
+    <button class="lock-skip" id="lockSkip" onclick="usePlain()" style="display:none">비밀번호 없이 사용하기</button>
+  </div>
+</div>
+
+<!-- 전체 레이아웃: [왼쪽 사이드바] [가운데 본문] [오른쪽 사이드바] -->
+<div class="layout">
+
+  <!-- ─────────── 왼쪽 사이드바: 오늘의 우선순위(상·중) 스티커 ─────────── -->
+  <aside class="side">
+    <div class="side-title">📌 오늘의 우선순위 목록</div>
+    <!-- 이 안의 내용은 diary.js의 renderSides() 함수가 자동으로 채웁니다 -->
+    <div id="hotList"></div>
+  </aside>
+
+  <!-- ─────────── 가운데 본문 ─────────── -->
+  <div class="wrap">
+
+    <!-- 제목 + 우측 상단 버튼들 -->
+    <header>
+      <h1><span class="note"></span>나의 할 일 다이어리</h1>
+      <div class="data-btns">
+        <button onclick="window.cloudSyncOpen ? cloudSyncOpen() : alert('클라우드 동기화는 인터넷 주소(호스팅)에서 열었을 때 사용할 수 있어요. 백엔드-동기화-설정가이드.md를 확인해 주세요.')" title="기기 간 데이터 동기화">☁ 동기화</button>
+        <button onclick="lockNow()" title="즉시 잠그기 / 비밀번호 설정">🔒 잠금</button>
+        <button id="trashBtn" onclick="setView('trash')">🗑 휴지통</button>
+        <button onclick="exportData()">💾 백업</button>
+        <button onclick="document.getElementById('importFile').click()">📂 불러오기</button>
+        <!-- 파일 선택창(평소엔 숨겨져 있고, 불러오기 버튼이 대신 눌러줌) -->
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      </div>
+    </header>
+
+    <!-- 퀵 메모 패널: 생각나는 것을 바로 적는 곳 -->
+    <div class="memo-panel">
+      <div class="memo-head" onclick="toggleMemo()">
+        <span>💭 퀵 메모 — 생각나면 바로 적어두세요</span><span id="memoArrow">▾</span>
+      </div>
+      <!-- 메모 입력창: 토글로 목록을 접어도 항상 보입니다 -->
+      <div class="memo-add">
+        <input type="text" id="memoText" placeholder="떠오른 생각, 아이디어, 잊으면 안 되는 것..." onkeydown="if(event.key==='Enter')addMemo()">
+        <button onclick="addMemo()">적기</button>
+      </div>
+      <!-- 메모 목록: 토글(▾/▸)로 접었다 펼 수 있는 부분 -->
+      <div class="memo-body" id="memoBody">
+        <ul class="memolist" id="memoList"></ul>
+      </div>
+    </div>
+
+    <!-- 일간 / 주간 / 월간 전환 탭 -->
+    <div class="tabs">
+      <button id="tab-day" class="on" onclick="setView('day')">📋 일간</button>
+      <button id="tab-week" onclick="setView('week')">🗓 주간</button>
+      <button id="tab-month" onclick="setView('month')">📆 월간</button>
+    </div>
+
+    <!-- 날짜 이동 바: ◀ 이전 / 제목 / 다음 ▶ / 오늘 -->
+    <div class="navbar">
+      <button onclick="nav(-1)">◀</button>
+      <div class="title" id="navTitle"></div>
+      <button onclick="nav(1)">▶</button>
+      <button class="today-btn" onclick="goToday()">오늘</button>
+    </div>
+
+    <!-- 메인 패널: 일간/주간/월간/휴지통 화면이 여기에 그려집니다 -->
+    <div class="panel" id="panel"></div>
+
+    <!-- 색상 안내(범례) -->
+    <div class="legend">
+      <span><span class="lg" style="background:var(--red)"></span>중요도 상</span>
+      <span><span class="lg" style="background:var(--orange)"></span>중요도 중</span>
+      <span><span class="lg" style="background:var(--blue)"></span>중요도 하</span>
+      <span><span class="lg" style="background:#8a9a8e"></span>중요도 기타</span>
+      <span><span class="lg" style="background:var(--carry)"></span>이월된 할 일</span>
+      <span><span class="lg" style="background:var(--green)"></span>완료</span>
+    </div>
+  </div>
+
+  <!-- ─────────── 오른쪽 사이드바: 퀵 메모 스티커 ─────────── -->
+  <aside class="side">
+    <div class="side-title">💭 퀵 메모</div>
+    <!-- diary.js의 renderSides() 함수가 채웁니다 -->
+    <div id="stickyMemos"></div>
+  </aside>
+
+</div><!-- /.layout -->
+
+<!-- JS 파일 연결: 모든 동작을 불러옵니다 (body 맨 끝에 두어야 HTML을 다 읽은 뒤 실행됨) -->
+<script src="diary.js"></script>
+<!-- 클라우드 동기화 모듈(선택): Firebase 설정 후 동작. 없어도 다이어리는 정상 작동 -->
+<script type="module" src="diary-sync.js"></script>
+</body>
+</html>

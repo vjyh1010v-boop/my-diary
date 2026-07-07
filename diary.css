@@ -1,0 +1,255 @@
+/* ============================================================
+   나의 할 일 다이어리 — CSS (디자인 담당)
+   ============================================================
+   이 파일은 화면의 "모습"을 결정합니다. (색, 크기, 배치, 글꼴)
+   - 구조는 diary.html, 동작은 diary.js에 있습니다.
+
+   [초보자 팁]
+   - :root 안의 --이름 은 "CSS 변수"입니다.
+     한 곳에서 색을 바꾸면 그 색을 쓰는 모든 곳이 함께 바뀝니다.
+     사용할 때는 var(--이름) 이라고 씁니다.
+   - .클래스이름 { 속성: 값; } 형태가 기본 문법입니다.
+   ============================================================ */
+
+/* ── 전체에서 쓰는 색상 변수 모음 ── */
+:root{
+  --bg:#eef4ee;          /* 페이지 배경(연한 그린) */
+  --card:#fbfdfa;        /* 카드/패널 배경 */
+  --ink:#28352c;         /* 기본 글자색 */
+  --sub:#71836f;         /* 보조 글자색(연한 회녹색) */
+  --accent:#4e9e5f;      /* 포인트 색(그린) */
+  --accent-dark:#3c7f4b; /* 포인트 색(진한 그린, 마우스 올렸을 때) */
+  --line:#d9e7d6;        /* 테두리 선 색 */
+  --red:#e05b4b;         /* 중요도 '상' */
+  --orange:#ef9c3f;      /* 중요도 '중' */
+  --blue:#5b8dd0;        /* 중요도 '하' */
+  --green:#2e8b57;       /* 완료 표시 */
+  --carry:#a06cc9;       /* 이월(보라) */
+}
+
+/* ── 기본 초기화: 모든 요소의 기본 여백 제거 ── */
+*{box-sizing:border-box; margin:0; padding:0;}
+
+/* 모바일 터치 최적화: 탭 시 파란 하이라이트 제거 + 더블탭 확대 지연 방지 */
+button,.chk,.sticky,.wday,.cal-cell,.memo-head{touch-action:manipulation; -webkit-tap-highlight-color:transparent;}
+
+body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif; background:var(--bg); color:var(--ink); min-height:100vh;}
+
+/* ── 전체 레이아웃: 왼쪽 사이드바 + 본문 + 오른쪽 사이드바 (flex로 가로 배치) ── */
+.layout{display:flex; gap:16px; max-width:1380px; margin:0 auto; padding:20px 16px 60px; align-items:flex-start;}
+.wrap{flex:1; min-width:0;} /* 본문이 남는 공간을 모두 차지 */
+
+/* ── 좌우 스티커메모 사이드바 ── */
+.side{width:195px; flex-shrink:0; position:sticky; top:16px; max-height:calc(100vh - 32px); overflow-y:auto; padding:2px;}
+.side-title{font-size:13px; font-weight:bold; color:var(--sub); margin-bottom:10px; text-align:center;}
+/* 포스트잇 느낌의 스티커: 살짝 기울이고(rotate) 그림자를 줌 */
+.sticky{background:#fff9c4; padding:10px 12px; margin-bottom:10px; border-radius:2px 2px 14px 2px; box-shadow:2px 3px 6px rgba(0,0,0,.18); font-size:12.5px; line-height:1.45; word-break:break-word; transform:rotate(-1.2deg); cursor:default;}
+.sticky:nth-child(even){transform:rotate(1.3deg);} /* 짝수 번째는 반대로 기울임 */
+.sticky.hot{background:#ffe2dc; border-top:3px solid var(--red); cursor:pointer;}    /* 중요도 상 */
+.sticky.midp{background:#ffefd6; border-top:3px solid var(--orange); cursor:pointer;} /* 중요도 중 */
+.sticky.hot:hover,.sticky.midp:hover{box-shadow:3px 4px 8px rgba(0,0,0,.25);}
+.sticky .s-date{font-size:10px; color:rgba(0,0,0,.45); margin-top:5px;}
+.side-empty{font-size:12px; color:var(--sub); text-align:center; padding:12px 8px; background:var(--card); border:1px dashed var(--line); border-radius:8px;}
+
+/* ── 우선순위 스티커 클릭 시 해당 할 일 반짝 강조 효과 (애니메이션) ── */
+.task.focused{animation:taskflash 2.2s ease-out; border-radius:8px;}
+@keyframes taskflash{
+  0%,45%{background:#fff3b0; box-shadow:inset 0 0 0 2px var(--accent);}
+  100%{background:transparent; box-shadow:none;}
+}
+
+/* ── 화면이 좁을 때(1080px 이하): 사이드바를 위아래로 배치 ── */
+@media(max-width:1080px){
+  .layout{flex-direction:column;}
+  .side{width:100%; position:static; max-height:none; overflow:visible;}
+  #hotList,#stickyMemos{display:flex; flex-wrap:wrap; gap:8px;}
+  #hotList .sticky,#stickyMemos .sticky{margin-bottom:0; flex:1 1 45%;}
+}
+
+/* ── 상단 헤더(제목 + 버튼들) ── */
+header{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px;}
+h1{font-size:22px; display:flex; align-items:center; gap:8px;}
+h1 .note{display:inline-block; width:22px; height:22px; background:var(--accent); border-radius:3px 3px 12px 3px; box-shadow:2px 2px 3px rgba(0,0,0,.15);}
+.data-btns{display:flex; gap:6px;}
+.data-btns button{font-size:12px; padding:6px 10px; border:1px solid var(--line); background:var(--card); border-radius:6px; cursor:pointer; color:var(--sub);}
+.data-btns button:hover{color:var(--ink);}
+
+/* ── 퀵 메모 패널 (노란 포스트잇 색) ── */
+.memo-panel{background:#fdf9e3; border:1px solid #e6dda9; border-radius:12px; padding:12px 14px; margin-bottom:14px; box-shadow:2px 3px 6px rgba(120,110,40,.12);}
+.memo-head{display:flex; justify-content:space-between; align-items:center; cursor:pointer; font-weight:bold; font-size:14px; color:#6b6230;}
+.memo-body{margin-top:4px;}
+.memo-add{display:flex; gap:6px; margin-top:10px;}
+.memo-add input{flex:1; padding:9px 12px; border:1px solid #e0d8a8; border-radius:8px; font-size:14px; background:#fffef6;}
+.memo-add button{padding:9px 16px; background:var(--accent); color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer;}
+.memo-add button:hover{background:var(--accent-dark);}
+ul.memolist{list-style:none; margin-top:8px;}
+.memo-item{display:flex; gap:8px; align-items:flex-start; padding:7px 4px; border-bottom:1px dashed #e6dda9; font-size:13px;}
+.memo-item:last-child{border-bottom:none;}
+.memo-item .m-time{font-size:11px; color:var(--sub); margin-top:2px;}
+.memo-item button{border:none; background:none; cursor:pointer; font-size:12px; color:var(--sub); padding:2px 5px; border-radius:5px; white-space:nowrap;}
+.memo-item button:hover{background:#f3ecc9; color:var(--ink);}
+
+/* ── 일간/주간/월간 탭 버튼 ── */
+.tabs{display:flex; gap:6px; margin-bottom:14px;}
+.tabs button{flex:1; padding:10px 0; font-size:15px; font-weight:bold; border:none; border-radius:10px 10px 0 0; cursor:pointer; background:#dcebd9; color:var(--sub);}
+.tabs button.on{background:var(--accent); color:#fff;} /* 현재 선택된 탭 */
+
+/* ── 날짜 이동 바 ── */
+.navbar{display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:14px;}
+.navbar button{width:34px; height:34px; border:1px solid var(--line); background:var(--card); border-radius:50%; font-size:15px; cursor:pointer;}
+.navbar .title{font-size:17px; font-weight:bold; min-width:200px; text-align:center;}
+.navbar .today-btn{width:auto; padding:0 12px; border-radius:17px; font-size:13px; color:var(--accent-dark); font-weight:bold;}
+
+/* ── 메인 패널(내용이 그려지는 큰 카드) ── */
+.panel{background:var(--card); border:1px solid var(--line); border-radius:0 12px 12px 12px; padding:18px; box-shadow:0 3px 10px rgba(45,90,55,.1);}
+
+/* ── 할 일 입력 폼 ── */
+.addform{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; background:#eaf4e7; padding:12px; border-radius:10px; border:1px dashed var(--accent);}
+.addform input[type=text]{flex:1 1 240px; padding:9px 12px; border:1px solid var(--line); border-radius:8px; font-size:14px;}
+.addform select,.addform input[type=date]{padding:8px; border:1px solid var(--line); border-radius:8px; font-size:13px; background:#fff; color:var(--ink);}
+.addform button{padding:9px 18px; background:var(--accent); color:#fff; border:none; border-radius:8px; font-weight:bold; font-size:14px; cursor:pointer;}
+.addform button:hover{background:var(--accent-dark);}
+.addform label{font-size:12px; color:var(--sub); display:flex; flex-direction:column; gap:3px;}
+
+/* ── 구역 제목 (진행 중 / 완료됨 등) ── */
+.sec-title{font-size:13px; font-weight:bold; color:var(--sub); margin:16px 0 8px; display:flex; align-items:center; gap:6px;}
+.sec-title .cnt{background:#dcebd9; border-radius:10px; padding:1px 8px; font-size:11px;}
+
+/* ── 할 일 목록 한 줄 ── */
+ul.tasklist{list-style:none;}
+li.task{display:flex; align-items:flex-start; gap:10px; padding:10px 8px; border-bottom:1px solid #e6efe2;}
+li.task:last-child{border-bottom:none;}
+/* 체크박스(직접 만든 것) */
+.chk{width:20px; height:20px; min-width:20px; margin-top:2px; border:2px solid var(--accent); border-radius:6px; background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px; color:#fff;}
+.chk.done{background:var(--green); border-color:var(--green);}
+.t-body{flex:1;}
+.t-text{font-size:15px; line-height:1.45;}
+.task.is-done .t-text{text-decoration:line-through; color:var(--sub);} /* 완료 시 취소선 */
+
+/* ── 뱃지(중요도/기한/이월/완료 등 작은 라벨) ── */
+.badges{display:flex; flex-wrap:wrap; gap:5px; margin-top:4px;}
+.badge{font-size:11px; padding:2px 8px; border-radius:10px; color:#fff; white-space:nowrap;}
+.b-high{background:var(--red);} .b-mid{background:var(--orange);} .b-low{background:var(--blue);} .b-etc{background:#8a9a8e;}
+.b-due{background:#fff; color:var(--sub); border:1px solid var(--line);}
+.b-due.overdue{color:var(--red); border-color:var(--red); font-weight:bold;} /* 기한 지남 */
+.b-carry{background:var(--carry);}
+.b-done{background:var(--green);}
+.b-moved{background:#fff; color:var(--carry); border:1px solid var(--carry);}
+
+/* ── 각 줄 오른쪽의 작은 버튼들(수정/내일로/휴지통) ── */
+.t-acts{display:flex; gap:4px;}
+.t-acts button{border:none; background:none; cursor:pointer; font-size:14px; color:var(--sub); padding:3px 5px; border-radius:5px;}
+.t-acts button:hover{background:#e6efe2; color:var(--ink);}
+.task.ghost{opacity:.55;} /* 다른 날로 넘어간 항목은 흐리게 */
+.empty{color:var(--sub); font-size:13px; text-align:center; padding:14px 0;}
+
+/* ── 일간 상단 통계 카드 ── */
+.stats{display:flex; gap:10px; margin-bottom:4px; flex-wrap:wrap;}
+.stat{flex:1; min-width:100px; background:#eaf4e7; border-radius:10px; padding:10px; text-align:center;}
+.stat .num{font-size:20px; font-weight:bold;}
+.stat .lbl{font-size:11px; color:var(--sub);}
+.stat.g .num{color:var(--green);} .stat.r .num{color:var(--red);} .stat.p .num{color:var(--carry);}
+
+/* ── 주간 보기 ── */
+.week-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px;} /* 7일을 7칸으로 */
+.wday{background:#f7fbf5; border:1px solid var(--line); border-radius:8px; padding:6px; min-height:130px; cursor:pointer;}
+.wday:hover{border-color:var(--accent);}
+.wday.today{border:2px solid var(--accent); background:#eaf4e7;}
+.wday .d-head{font-size:12px; font-weight:bold; text-align:center; padding-bottom:4px; border-bottom:1px solid var(--line); margin-bottom:5px;}
+.wday .d-head .dow{color:var(--sub); font-weight:normal;}
+.wday.sun .d-head{color:var(--red);} .wday.sat .d-head{color:var(--blue);}
+.witem{font-size:11px; line-height:1.35; margin-bottom:3px; display:flex; gap:3px; align-items:flex-start;}
+.witem .dot{width:7px; height:7px; min-width:7px; border-radius:50%; margin-top:3px;}
+.witem.wdone{color:var(--sub); text-decoration:line-through;}
+.wcnt{font-size:10px; color:var(--sub); text-align:center; margin-top:4px;}
+/* 기한까지 이어지는 가로 막대(주간): 시작/끝 날만 모서리를 둥글게 해 이어져 보이게 함 */
+.wbar{font-size:10px; color:#fff; padding:2px 5px; margin:0 -7px 3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:.92;}
+.wbar.b-start{margin-left:0; border-radius:8px 0 0 8px;}
+.wbar.b-end{margin-right:0; border-radius:0 8px 8px 0;}
+.wbar.b-start.b-end{border-radius:8px;}
+
+/* ── 월간 달력 ── */
+.cal-dows{display:grid; grid-template-columns:repeat(7,1fr); text-align:center; font-size:12px; font-weight:bold; color:var(--sub); margin-bottom:6px;}
+.cal-dows span:first-child{color:var(--red);} .cal-dows span:last-child{color:var(--blue);}
+.cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:5px;}
+.cal-cell{background:#f7fbf5; border:1px solid var(--line); border-radius:8px; min-height:86px; padding:5px; cursor:pointer; position:relative;}
+.cal-cell:hover{border-color:var(--accent);}
+.cal-cell.dim{opacity:.35;} /* 이번 달이 아닌 날짜는 흐리게 */
+.cal-cell.today{border:2px solid var(--accent); background:#eaf4e7;}
+.cal-cell .dnum{font-size:12px; font-weight:bold;}
+.cal-cell.c-sun .dnum{color:var(--red);} .cal-cell.c-sat .dnum{color:var(--blue);}
+.cal-tag{font-size:10px; border-radius:8px; padding:1px 5px; margin-top:3px; display:inline-block;}
+.tag-done{background:#e2f0e3; color:var(--green);}
+.tag-todo{background:#fbe3e0; color:var(--red);}
+.tag-carry{background:#efe3f8; color:var(--carry);}
+/* 달성률 막대: 안쪽 i 요소의 너비(%)로 표현 */
+.cal-bar{height:4px; border-radius:2px; background:#eee; margin-top:4px; overflow:hidden;}
+.cal-bar i{display:block; height:100%; background:var(--green);}
+/* 기한까지 이어지는 가로 막대(월간) */
+.mbar{font-size:9px; color:#fff; padding:1px 4px; margin:2px -6px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:.9;}
+.mbar.b-start{margin-left:0; border-radius:7px 0 0 7px;}
+.mbar.b-end{margin-right:0; border-radius:0 7px 7px 0;}
+.mbar.b-start.b-end{border-radius:7px;}
+
+/* ── 하단 색상 안내(범례) ── */
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--sub); margin-top:12px; justify-content:center;}
+.legend span{display:flex; align-items:center; gap:4px;}
+.lg{width:10px; height:10px; border-radius:50%; display:inline-block;}
+
+/* ── 수정 폼 / 휴지통 ── */
+.edit-form{display:flex; flex-wrap:wrap; gap:6px; flex:1; align-items:center;}
+.edit-form input[type=text]{flex:1 1 180px; padding:8px 10px; border:1px solid var(--accent); border-radius:8px; font-size:14px;}
+.edit-form select,.edit-form input[type=date]{padding:7px; border:1px solid var(--line); border-radius:8px; font-size:12px; background:#fff; color:var(--ink);}
+.btn-sm{padding:7px 12px; border:none; border-radius:8px; font-size:12px; font-weight:bold; cursor:pointer;}
+.btn-save{background:var(--accent); color:#fff;}
+.btn-cancel{background:#dcebd9; color:var(--sub);}
+.trash-note{font-size:12px; color:var(--sub); background:#eaf4e7; border-radius:8px; padding:8px 12px; margin-bottom:12px; line-height:1.5;}
+.b-dday{background:#fff; color:var(--red); border:1px solid var(--red);}
+
+/* ── 잠금 화면 (비밀번호 로그인/설정) ── */
+.lock-screen{position:fixed; inset:0; background:var(--bg); z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px;}
+.lock-card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:30px 26px; max-width:340px; width:100%; text-align:center; box-shadow:0 8px 30px rgba(45,90,55,.15);}
+.lock-logo{font-size:40px; margin-bottom:10px;}
+.lock-card h2{font-size:18px; margin-bottom:6px;}
+.lock-desc{font-size:12px; color:var(--sub); line-height:1.6; margin-bottom:14px;}
+.lock-card input{width:100%; padding:11px 12px; border:1px solid var(--line); border-radius:8px; font-size:16px; margin-bottom:8px;}
+.lock-msg{font-size:12px; color:var(--red); min-height:16px; margin-bottom:6px;}
+.lock-btn{width:100%; padding:12px; background:var(--accent); color:#fff; border:none; border-radius:8px; font-weight:bold; font-size:15px; cursor:pointer;}
+.lock-btn:hover{background:var(--accent-dark);}
+.lock-skip{background:none; border:none; color:var(--sub); font-size:12px; margin-top:10px; cursor:pointer; text-decoration:underline;}
+
+/* ── 화면이 아주 좁을 때(스마트폰) ── */
+@media(max-width:640px){
+  .layout{padding:12px 10px 40px; gap:10px;}
+  header{justify-content:center; text-align:center;}
+  h1{font-size:19px;}
+  .data-btns{flex-wrap:wrap; justify-content:center;}
+  .data-btns button{padding:9px 12px;}
+
+  /* 입력창 글자를 16px 이상으로: 아이폰에서 입력 시 화면이 자동 확대되는 것 방지 */
+  .memo-add input,.addform input[type=text],.edit-form input[type=text]{font-size:16px;}
+  .addform select,.addform input[type=date],.edit-form select,.edit-form input[type=date]{font-size:14px; padding:9px;}
+
+  /* 손가락으로 누르기 쉽게 버튼/체크박스 키우기 */
+  .tabs button{padding:13px 0; font-size:14px;}
+  .navbar button{width:42px; height:42px;}
+  .navbar .title{min-width:auto; font-size:15px;}
+  .chk{width:24px; height:24px; min-width:24px; font-size:15px;}
+  .t-acts button{font-size:16px; padding:7px 8px;}
+  .memo-item button{font-size:14px; padding:6px;}
+  .memo-add button,.addform button{padding:11px 16px;}
+
+  .panel{padding:12px;}
+  .stats{display:grid; grid-template-columns:1fr 1fr; gap:8px;}  /* 통계 카드 2x2 */
+  .t-text{font-size:16px;}
+
+  /* 주간: 2칸씩, 월간: 칸을 작게 */
+  .week-grid{grid-template-columns:repeat(2,1fr);}
+  .cal-cell{min-height:56px; padding:3px;}
+  .cal-tag{font-size:9px; padding:1px 3px;}
+  .mbar{font-size:8px; padding:1px 3px;}
+
+  /* 사이드바 스티커: 세로로 길게 쌓이지 않게, 옆으로 미는 한 줄 스크롤로 변경 */
+  #hotList,#stickyMemos{flex-wrap:nowrap; overflow-x:auto; padding-bottom:6px; -webkit-overflow-scrolling:touch;}
+  #hotList .sticky,#stickyMemos .sticky{flex:0 0 160px;}
+}
