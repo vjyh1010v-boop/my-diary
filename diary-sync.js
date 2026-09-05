@@ -23,12 +23,16 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
          onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* ▼▼▼ [여기에 붙여넣기] Firebase 콘솔 > 프로젝트 설정 > 내 앱 > SDK 구성 ▼▼▼ */
+/* ▼▼▼ Firebase 설정값 (콘솔 > 프로젝트 설정 > 내 앱 > SDK 구성) ▼▼▼
+   ※ 이 값들은 공개되어도 안전한 "프로젝트 이름표"입니다.
+      실제 보안은 Firestore 보안 규칙이 담당합니다.                      */
 const firebaseConfig = {
-  apiKey: "AIzaSyD1CSN9Lk_1tmU_geFAjukT4q5-odGAKBg",
-  authDomain: "my-diary-7.firebaseapp.com",
-  projectId: "my-diary-7",
-  appId: "1:969654501721:web:c409cdf8b9ddee88210c48"
+  apiKey:            "AIzaSyD1CSN9Lk_1tmU_geFAjukT4q5-odGAKBg",
+  authDomain:        "my-diary-7.firebaseapp.com",
+  projectId:         "my-diary-7",
+  storageBucket:     "my-diary-7.firebasestorage.app",
+  messagingSenderId: "969654501721",
+  appId:             "1:969654501721:web:c409cdf8b9ddee88210c48"
 };
 /* ▲▲▲ ------------------------------------------------------------ ▲▲▲ */
 
