@@ -35,14 +35,25 @@ button,.chk,.sticky,.wday,.cal-cell,.memo-head{touch-action:manipulation; -webki
 
 body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif; background:var(--bg); color:var(--ink); min-height:100vh;}
 
-/* ── 전체 레이아웃: 왼쪽 사이드바 + 본문 + 오른쪽 사이드바 (flex로 가로 배치) ── */
-.layout{display:flex; gap:16px; max-width:1380px; margin:0 auto; padding:20px 16px 60px; align-items:flex-start;}
-.wrap{flex:1; min-width:0;} /* 본문이 남는 공간을 모두 차지 */
+/* ── 전체 레이아웃: 모든 것을 가운데 한 줄로 세로 배치 ──
+   순서는 order로 정합니다: 퀵 메모(위) → 다이어리 본문 → 오늘의 우선순위(아래) */
+.layout{display:flex; flex-direction:column; gap:14px; max-width:900px; margin:0 auto; padding:20px 16px 60px;}
+.wrap{width:100%; min-width:0; order:0;}
+#sideMemo{order:-1;}   /* 퀵 메모 스티커를 맨 위로 */
+#sideHot{order:1;}     /* 오늘의 우선순위를 맨 아래로 */
 
-/* ── 좌우 스티커메모 사이드바 ── */
-.side{width:195px; flex-shrink:0; position:sticky; top:16px; max-height:calc(100vh - 32px); overflow-y:auto; padding:2px;}
+/* ── 스티커메모 영역 (가로 한 줄, 넘치면 옆으로 스크롤) ── */
+.side{width:100%; padding:2px;}
 .side-title{font-size:13px; font-weight:bold; color:var(--sub); margin-bottom:10px; text-align:center;}
 /* 포스트잇 느낌의 스티커: 살짝 기울이고(rotate) 그림자를 줌 */
+/* 스티커 목록: 가로로 나열, 개수가 많으면 옆으로 밀어서 보기 */
+#hotList,#stickyMemos{
+  display:flex; flex-wrap:nowrap; gap:10px; align-items:stretch; justify-content:flex-start;
+  overflow-x:auto; padding:4px 2px 8px; -webkit-overflow-scrolling:touch;
+}
+#hotList .sticky,#stickyMemos .sticky{flex:0 0 190px; min-height:78px; margin-bottom:0;}
+#hotList .side-empty,#stickyMemos .side-empty{flex:1 1 auto;}
+
 .sticky{background:#fff9c4; padding:10px 12px; margin-bottom:10px; border-radius:2px 2px 14px 2px; box-shadow:2px 3px 6px rgba(0,0,0,.18); font-size:12.5px; line-height:1.45; word-break:break-word; transform:rotate(-1.2deg); cursor:default;}
 .sticky:nth-child(even){transform:rotate(1.3deg);} /* 짝수 번째는 반대로 기울임 */
 .sticky.hot{background:#ffe2dc; border-top:3px solid var(--red); cursor:pointer;}    /* 중요도 상 */
@@ -56,28 +67,6 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif; background:va
 @keyframes taskflash{
   0%,45%{background:#fff3b0; box-shadow:inset 0 0 0 2px var(--accent);}
   100%{background:transparent; box-shadow:none;}
-}
-
-/* ── 화면이 좁을 때(1080px 이하): 사이드바를 위아래로 배치 ──
-   order로 순서 재배치: 퀵 메모(위) → 본문 → 우선순위(아래)
-   스티커는 늘어나지 않도록 고정 폭 + 가로 스크롤 한 줄로 표시 */
-@media(max-width:1080px){
-  .layout{flex-direction:column;}
-  .side{width:100%; position:static; max-height:none; overflow:visible;}
-  #sideMemo{order:-1;}   /* 퀵 메모 스티커를 맨 위로 */
-  .wrap{order:0;}
-  #sideHot{order:1;}     /* 오늘의 우선순위를 맨 아래로 */
-
-  #hotList,#stickyMemos{
-    display:flex; flex-wrap:nowrap; gap:10px; align-items:stretch;
-    overflow-x:auto; padding:4px 2px 8px; -webkit-overflow-scrolling:touch;
-  }
-  /* 늘어나지 않게 고정 폭, 높이는 서로 같게 */
-  #hotList .sticky,#stickyMemos .sticky{
-    margin-bottom:0; flex:0 0 190px; min-height:78px;
-  }
-  /* 비었을 때만 한 줄로 얌전히 */
-  #hotList .side-empty,#stickyMemos .side-empty{flex:1 1 auto; min-width:0;}
 }
 
 /* ── 상단 헤더(제목 + 버튼들) ── */
