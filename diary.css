@@ -58,12 +58,26 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif; background:va
   100%{background:transparent; box-shadow:none;}
 }
 
-/* ── 화면이 좁을 때(1080px 이하): 사이드바를 위아래로 배치 ── */
+/* ── 화면이 좁을 때(1080px 이하): 사이드바를 위아래로 배치 ──
+   order로 순서 재배치: 퀵 메모(위) → 본문 → 우선순위(아래)
+   스티커는 늘어나지 않도록 고정 폭 + 가로 스크롤 한 줄로 표시 */
 @media(max-width:1080px){
   .layout{flex-direction:column;}
   .side{width:100%; position:static; max-height:none; overflow:visible;}
-  #hotList,#stickyMemos{display:flex; flex-wrap:wrap; gap:8px;}
-  #hotList .sticky,#stickyMemos .sticky{margin-bottom:0; flex:1 1 45%;}
+  #sideMemo{order:-1;}   /* 퀵 메모 스티커를 맨 위로 */
+  .wrap{order:0;}
+  #sideHot{order:1;}     /* 오늘의 우선순위를 맨 아래로 */
+
+  #hotList,#stickyMemos{
+    display:flex; flex-wrap:nowrap; gap:10px; align-items:stretch;
+    overflow-x:auto; padding:4px 2px 8px; -webkit-overflow-scrolling:touch;
+  }
+  /* 늘어나지 않게 고정 폭, 높이는 서로 같게 */
+  #hotList .sticky,#stickyMemos .sticky{
+    margin-bottom:0; flex:0 0 190px; min-height:78px;
+  }
+  /* 비었을 때만 한 줄로 얌전히 */
+  #hotList .side-empty,#stickyMemos .side-empty{flex:1 1 auto; min-width:0;}
 }
 
 /* ── 상단 헤더(제목 + 버튼들) ── */
@@ -218,10 +232,15 @@ li.task:last-child{border-bottom:none;}
 .lock-btn:hover{background:var(--accent-dark);}
 .lock-skip{background:none; border:none; color:var(--sub); font-size:12px; margin-top:10px; cursor:pointer; text-decoration:underline;}
 
-/* 구글 로그인 버튼 & 구분선 */
-.g-login-btn{width:100%; padding:12px; background:#fff; color:#3c4043; border:1px solid #dadce0; border-radius:8px;
-             font-size:14px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;}
-.g-login-btn:hover{background:#f6f9fe; box-shadow:0 1px 3px rgba(0,0,0,.1);}
+/* 구글 로그인 버튼 & 구분선 (구글 브랜드 가이드라인에 맞춘 스타일) */
+.g-login-btn{width:100%; height:44px; padding:0 14px; background:#fff; color:#1f1f1f;
+             border:1px solid #dadce0; border-radius:22px; cursor:pointer;
+             font-family:'Roboto','Malgun Gothic',sans-serif; font-size:14px; font-weight:500; letter-spacing:.2px;
+             display:flex; align-items:center; justify-content:center; gap:10px;
+             transition:background .15s, box-shadow .15s, border-color .15s;}
+.g-login-btn .g-logo{width:18px; height:18px; flex-shrink:0;}
+.g-login-btn:hover{background:#f8faff; border-color:#d2e3fc; box-shadow:0 1px 3px rgba(60,64,67,.2);}
+.g-login-btn:active{background:#f1f5fd;}
 .or-line{display:flex; align-items:center; gap:8px; margin:14px 0 10px; color:var(--sub); font-size:11px;}
 .or-line::before,.or-line::after{content:''; flex:1; height:1px; background:var(--line);}
 
@@ -256,7 +275,6 @@ li.task:last-child{border-bottom:none;}
   .cal-tag{font-size:9px; padding:1px 3px;}
   .mbar{font-size:8px; padding:1px 3px;}
 
-  /* 사이드바 스티커: 세로로 길게 쌓이지 않게, 옆으로 미는 한 줄 스크롤로 변경 */
-  #hotList,#stickyMemos{flex-wrap:nowrap; overflow-x:auto; padding-bottom:6px; -webkit-overflow-scrolling:touch;}
-  #hotList .sticky,#stickyMemos .sticky{flex:0 0 160px;}
+  /* 폰에서는 스티커를 조금 더 작게 */
+  #hotList .sticky,#stickyMemos .sticky{flex:0 0 155px; min-height:70px;}
 }

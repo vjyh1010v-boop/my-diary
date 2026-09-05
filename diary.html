@@ -44,7 +44,7 @@
 <div class="layout">
 
   <!-- ─────────── 왼쪽 사이드바: 오늘의 우선순위(상·중) 스티커 ─────────── -->
-  <aside class="side">
+  <aside class="side" id="sideHot">
     <div class="side-title">📌 오늘의 우선순위 목록</div>
     <!-- 이 안의 내용은 diary.js의 renderSides() 함수가 자동으로 채웁니다 -->
     <div id="hotList"></div>
@@ -113,7 +113,7 @@
   </div>
 
   <!-- ─────────── 오른쪽 사이드바: 퀵 메모 스티커 ─────────── -->
-  <aside class="side">
+  <aside class="side" id="sideMemo">
     <div class="side-title">💭 퀵 메모</div>
     <!-- diary.js의 renderSides() 함수가 채웁니다 -->
     <div id="stickyMemos"></div>
