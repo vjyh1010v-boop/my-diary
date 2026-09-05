@@ -218,6 +218,13 @@ li.task:last-child{border-bottom:none;}
 .lock-btn:hover{background:var(--accent-dark);}
 .lock-skip{background:none; border:none; color:var(--sub); font-size:12px; margin-top:10px; cursor:pointer; text-decoration:underline;}
 
+/* 구글 로그인 버튼 & 구분선 */
+.g-login-btn{width:100%; padding:12px; background:#fff; color:#3c4043; border:1px solid #dadce0; border-radius:8px;
+             font-size:14px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;}
+.g-login-btn:hover{background:#f6f9fe; box-shadow:0 1px 3px rgba(0,0,0,.1);}
+.or-line{display:flex; align-items:center; gap:8px; margin:14px 0 10px; color:var(--sub); font-size:11px;}
+.or-line::before,.or-line::after{content:''; flex:1; height:1px; background:var(--line);}
+
 /* ── 화면이 아주 좁을 때(스마트폰) ── */
 @media(max-width:640px){
   .layout{padding:12px 10px 40px; gap:10px;}

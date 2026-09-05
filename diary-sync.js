@@ -20,6 +20,7 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+         GoogleAuthProvider, signInWithPopup,
          onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -61,7 +62,14 @@ function ensureUI(){
 
       <!-- 로그인 전 화면 -->
       <div id="syncAuthBox">
-        <p class="lock-desc">이메일 계정으로 로그인하면<br>PC와 폰에서 같은 데이터를 쓸 수 있어요.</p>
+        <p class="lock-desc">로그인하면 PC와 폰에서<br>같은 데이터를 쓸 수 있어요.</p>
+
+        <!-- 구글 계정으로 한 번에 로그인 -->
+        <button class="g-login-btn" onclick="googleLogin()">
+          <span style="font-size:16px">🇬</span> Google 계정으로 계속하기
+        </button>
+        <div class="or-line"><span>또는 이메일로</span></div>
+
         <input type="email" id="syncEmail" placeholder="이메일" autocomplete="email">
         <input type="password" id="syncPw" placeholder="비밀번호 (6자 이상)" autocomplete="current-password"
                onkeydown="if(event.key==='Enter')cloudLogin()">
@@ -138,6 +146,22 @@ window.cloudLogin = async function(){
   }catch(e){ msg('syncMsg', friendly(e)); }
 };
 window.cloudLogout = async function(){ await signOut(auth); };
+
+/* ── 구글 계정으로 로그인 (팝업) ── */
+window.googleLogin = async function(){
+  try{
+    await signInWithPopup(auth, new GoogleAuthProvider());
+    msg('syncMsg','');
+  }catch(e){
+    const c=(e&&e.code)||'';
+    if(c.includes('popup-closed')||c.includes('cancelled-popup')) return;  // 사용자가 창을 닫음
+    if(c.includes('operation-not-allowed'))
+      msg('syncMsg','Firebase 콘솔에서 Google 로그인을 켜주세요.');
+    else if(c.includes('popup-blocked'))
+      msg('syncMsg','브라우저가 팝업을 막았어요. 팝업 허용 후 다시 시도해 주세요.');
+    else msg('syncMsg', friendly(e));
+  }
+};
 
 /* ── ⬆ 업로드: 이 기기의 데이터를 내 계정 공간에 저장 ── */
 window.cloudUpload = async function(){
