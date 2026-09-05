@@ -48,7 +48,7 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif; background:va
 /* 포스트잇 느낌의 스티커: 살짝 기울이고(rotate) 그림자를 줌 */
 /* 스티커 목록: 가로로 나열, 개수가 많으면 옆으로 밀어서 보기 */
 #hotList,#stickyMemos{
-  display:flex; flex-wrap:nowrap; gap:10px; align-items:stretch; justify-content:flex-start;
+  display:flex; flex-wrap:nowrap; gap:10px; align-items:stretch; justify-content:center;
   overflow-x:auto; padding:4px 2px 8px; -webkit-overflow-scrolling:touch;
 }
 #hotList .sticky,#stickyMemos .sticky{flex:0 0 190px; min-height:78px; margin-bottom:0;}
@@ -61,6 +61,18 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif; background:va
 .sticky.hot:hover,.sticky.midp:hover{box-shadow:3px 4px 8px rgba(0,0,0,.25);}
 .sticky .s-date{font-size:10px; color:rgba(0,0,0,.45); margin-top:5px;}
 .side-empty{font-size:12px; color:var(--sub); text-align:center; padding:12px 8px; background:var(--card); border:1px dashed var(--line); border-radius:8px;}
+
+/* ── 넓은 화면(1081px 이상): 좌우 사이드바로 펼치기 ──
+   퀵 메모(왼쪽) | 다이어리 본문(가운데) | 오늘의 우선순위(오른쪽) */
+@media(min-width:1081px){
+  .layout{flex-direction:row; align-items:flex-start; gap:16px; max-width:1380px;}
+  .wrap{flex:1;}
+  .side{width:200px; flex-shrink:0; position:sticky; top:16px;
+        max-height:calc(100vh - 32px); overflow-y:auto;}
+  /* 사이드바 안에서는 스티커를 세로로 쌓기 */
+  #hotList,#stickyMemos{flex-direction:column; overflow-x:visible; justify-content:flex-start;}
+  #hotList .sticky,#stickyMemos .sticky{flex:0 0 auto; width:100%; min-height:0;}
+}
 
 /* ── 우선순위 스티커 클릭 시 해당 할 일 반짝 강조 효과 (애니메이션) ── */
 .task.focused{animation:taskflash 2.2s ease-out; border-radius:8px;}
