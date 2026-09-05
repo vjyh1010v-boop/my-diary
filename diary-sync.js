@@ -25,10 +25,10 @@ import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/fireb
 
 /* ▼▼▼ [여기에 붙여넣기] Firebase 콘솔 > 프로젝트 설정 > 내 앱 > SDK 구성 ▼▼▼ */
 const firebaseConfig = {
-  apiKey:     "여기에_apiKey_붙여넣기",
-  authDomain: "프로젝트이름.firebaseapp.com",
-  projectId:  "프로젝트이름",
-  appId:      "여기에_appId_붙여넣기"
+  apiKey: "AIzaSyD1CSN9Lk_1tmU_geFAjukT4q5-odGAKBg",
+  authDomain: "my-diary-7.firebaseapp.com",
+  projectId: "my-diary-7",
+  appId: "1:969654501721:web:c409cdf8b9ddee88210c48"
 };
 /* ▲▲▲ ------------------------------------------------------------ ▲▲▲ */
 
